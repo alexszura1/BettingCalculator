@@ -1,14 +1,45 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Parlay Calculator – Calculate parlays with our easy-to-use betting odds calculator.">
+    <title>Parlay Calculator</title>
+    <link rel="stylesheet" href="styles.css"> <!-- assuming styles.css is in the same folder -->
+</head>
+<body>
+    <header>
+        <h1>Betting Odds Calculator</h1>
+    </header>
 
-{% block title %}Parlay Calculator - Sports Betting Tools{% endblock %}
+    <nav>
+        <a href="/">Home</a>
+        <a href="/parlay">Parlay Calculator</a>
+        <a href="/profit_boost">Profit Boost Calculator</a>
+    </nav>
 
-{% block content %}
-    <h2>Parlay Calculator</h2>
-    <p>Use this tool to calculate potential payouts for parlay bets.</p>
-    <button>Coming Soon</button>
+    <main>
+        <section>
+            <h1>Parlay Calculator</h1>
+            <p>Use this tool to calculate your parlay odds and potential profits.</p>
 
-    <!-- Test inline style -->
-    <style>
+            <!-- Add the form or calculator functionality here -->
+            <form>
+                <label for="bet1">Bet 1:</label>
+                <input type="text" id="bet1" name="bet1">
+                <br>
 
-    </style>
-{% endblock %}
+                <label for="bet2">Bet 2:</label>
+                <input type="text" id="bet2" name="bet2">
+                <br>
+
+                <button type="submit">Calculate</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Betting Odds Calculator. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

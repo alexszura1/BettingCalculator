@@ -1,11 +1,32 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Betting Odds Calculator – Quickly calculate betting odds, parlays, and profit boosts with our intuitive tools.">
+    <title>Betting Odds Calculator</title>
+    <link rel="stylesheet" href="styles.css"> <!-- assuming styles.css is in the same folder -->
+</head>
+<body>
+    <header>
+        <h1>Betting Odds Calculator</h1>
+    </header>
 
-{% block content %}
-<main>
-    
-    <section class="container">
-        <h1>Welcome to the Betting Odds Calculator</h1>
-        <p>Calculate betting odds easily with our tools. Use the navigation above to get started!</p>
-    </section>
-</main>
-{% endblock %}
+    <nav>
+        <a href="/">Home</a>
+        <a href="/parlay">Parlay Calculator</a>
+        <a href="/profit_boost">Profit Boost Calculator</a>
+    </nav>
+
+    <main>
+        <section>
+            <h1>Welcome to the Betting Odds Calculator</h1>
+            <p>Calculate betting odds easily with our tools. Use the navigation above to get started!</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Betting Odds Calculator. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
