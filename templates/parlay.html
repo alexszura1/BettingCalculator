@@ -1,47 +1,59 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<main>
-    <section class="container">
-        <h1>Parlay Odds Calculator</h1>
-        <p>Enter the odds for each leg of your parlay:</p>
+    <main>
+        <section class="container">
+            <h1>Parlay Calculator</h1>
+            <p>Use this tool to calculate the total odds and payout for your parlay. Enter the odds for each leg below, and optionally enter the dollar amount to calculate the potential payout.</p>
 
-        <form action="/parlay" method="POST">
-            <div id="odds-container">
+            <form action="{{ url_for('parlay') }}" method="POST">
                 <div class="form-group">
-                    <label for="odds_1">Leg 1 Odds:</label>
-                    <input type="text" id="odds_1" name="odds[]" required>
+                    <label for="odds">Enter the odds for each leg of the parlay:</label>
+                    <div id="odds-container">
+                        <div class="odds-leg">
+                            <input type="number" name="odds[]" required placeholder="Leg 1 odds (e.g. -200)">
+                        </div>
+                    </div>
+                    <button type="button" id="add-leg" class="btn">Add Another Leg</button>
                 </div>
-            </div>
 
-            <button type="button" id="add-leg-btn">Add Another Leg</button>
-            <button type="submit" class="btn">Calculate</button>
-        </form>
+                <div class="form-group">
+                    <label for="dollar_amount">Enter dollar amount (optional):</label>
+                    <input type="number" id="dollar_amount" name="dollar_amount" step="0.01" placeholder="$">
+                </div>
 
-        {% if error_message %}
-            <p class="error">{{ error_message }}</p>
-        {% endif %}
+                <button type="submit" class="btn">Calculate</button>
+            </form>
 
-        {% if results %}
-            <div class="result">
-                <h2>Results</h2>
-                <p>Total Decimal Odds: {{ results.decimal_odds }}</p>
-                <p>Total American Odds: {{ results.american_odds }}</p>
-            </div>
-        {% endif %}
-    </section>
-</main>
+            {% if results %}
+                <div class="result">
+                    <h2>Calculation Results</h2>
+                    <p>Total Decimal Odds: {{ results['decimal_odds'] }}</p>
+                    <p>Total American Odds: {{ results['american_odds'] }}</p>
 
-<script>
-    document.getElementById('add-leg-btn').addEventListener('click', function() {
-        const container = document.getElementById('odds-container');
-        const legCount = container.children.length + 1;
-        const newInput = `
-            <div class="form-group">
-                <label for="odds_${legCount}">Leg ${legCount} Odds:</label>
-                <input type="text" id="odds_${legCount}" name="odds[]" required>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', newInput);
-    });
-</script>
+                    {% if dollar_amount %}
+                        <p>Entered Dollar Amount: ${{ dollar_amount }}</p>
+                        <p>Potential Payout: ${{ results['payout'] }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if error_message %}
+                <div class="error-message">
+                    <p>{{ error_message }}</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        // Add event listener to add more odds input fields dynamically
+        document.getElementById('add-leg').addEventListener('click', function() {
+            const container = document.getElementById('odds-container');
+            const newLeg = document.createElement('div');
+            newLeg.classList.add('odds-leg');
+            newLeg.innerHTML = '<input type="number" name="odds[]" required placeholder="Leg odds (e.g. -200)">';
+            container.appendChild(newLeg);
+        });
+    </script>
 {% endblock %}

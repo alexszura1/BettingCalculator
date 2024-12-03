@@ -11,21 +11,37 @@ def index():
 def parlay():
     error_message = None
     results = None
+    dollar_amount = None
+    payout = None
 
     if request.method == 'POST':
-        odds_list = request.form.getlist('odds[]')  # Retrieve odds as a list
         try:
-            # Convert input strings to integers
+            # Retrieve the odds list as a list of integers
+            odds_list = request.form.getlist('odds[]')
             odds_list = [int(odds) for odds in odds_list]
-            decimal_odds, american_odds = calculate_parlay(odds_list)
-            results = {
-                "decimal_odds": decimal_odds,
-                "american_odds": american_odds
-            }
-        except ValueError:
-            error_message = 'Please only input odds, i.e. -200, +150, etc.'
 
-    return render_template('parlay.html', results=results, error_message=error_message)
+            # Calculate the parlay odds
+            decimal_odds, american_odds = calculate_parlay(odds_list)
+
+            # Get the dollar amount, if provided
+            dollar_amount = request.form.get('dollar_amount')
+            dollar_amount = float(dollar_amount) if dollar_amount else None
+
+            # Calculate payout if a dollar amount is provided
+            if dollar_amount:
+                payout = dollar_amount * decimal_odds
+
+            results = {
+                "decimal_odds": round(decimal_odds, 2),
+                "american_odds": round(american_odds),
+                "payout": round(payout, 2) if payout else None
+            }
+
+        except ValueError:
+            error_message = 'Please only input odds in the correct format (e.g., -200, +150, etc.).'
+
+    return render_template('parlay.html', results=results, error_message=error_message, dollar_amount=dollar_amount)
+
 
 @app.route('/profit_boost', methods=['GET', 'POST'])
 def profit_boost():
