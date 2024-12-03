@@ -1,14 +1,47 @@
 {% extends 'base.html' %}
 
-{% block title %}Parlay Calculator - Sports Betting Tools{% endblock %}
-
 {% block content %}
-    <h2>Parlay Calculator</h2>
-    <p>Use this tool to calculate potential payouts for parlay bets.</p>
-    <button>Coming Soon</button>
+<main>
+    <section class="container">
+        <h1>Parlay Odds Calculator</h1>
+        <p>Enter the odds for each leg of your parlay:</p>
 
-    <!-- Test inline style -->
-    <style>
+        <form action="/parlay" method="POST">
+            <div id="odds-container">
+                <div class="form-group">
+                    <label for="odds_1">Leg 1 Odds:</label>
+                    <input type="text" id="odds_1" name="odds[]" required>
+                </div>
+            </div>
 
-    </style>
+            <button type="button" id="add-leg-btn">Add Another Leg</button>
+            <button type="submit" class="btn">Calculate</button>
+        </form>
+
+        {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+        {% endif %}
+
+        {% if results %}
+            <div class="result">
+                <h2>Results</h2>
+                <p>Total Decimal Odds: {{ results.decimal_odds }}</p>
+                <p>Total American Odds: {{ results.american_odds }}</p>
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+<script>
+    document.getElementById('add-leg-btn').addEventListener('click', function() {
+        const container = document.getElementById('odds-container');
+        const legCount = container.children.length + 1;
+        const newInput = `
+            <div class="form-group">
+                <label for="odds_${legCount}">Leg ${legCount} Odds:</label>
+                <input type="text" id="odds_${legCount}" name="odds[]" required>
+            </div>`;
+        container.insertAdjacentHTML('beforeend', newInput);
+    });
+</script>
 {% endblock %}
