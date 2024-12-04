@@ -1,0 +1,9 @@
+Flask==3.1.0
+Werkzeug==3.1.3
+Jinja2==3.1.2
+itsdangerous==2.2.0
+click==8.1.7
+blinker==1.9.0
+MarkupSafe==2.1.1
+openai==0.27.0  # Include this if you're using OpenAI API
+gunicorn==21.0.0  # Optional, for production server on Render
