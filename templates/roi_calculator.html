@@ -1,40 +1,70 @@
 {% extends 'base.html' %}
 
+{% block title %}ROI Calculator{% endblock %}
+
 {% block content %}
     <main>
         <section class="container">
             <h1>ROI Calculator</h1>
-            <p>Use this tool to calculate your profit boost for betting odds. Enter your bet details below:</p>
+            <p>Use this tool to calculate your return on investment with profit boosts. Enter your details below:</p>
 
             <form action="{{ url_for('roi_calculator') }}" method="POST">
                 <div class="form-group">
-                    <label for="bet_amount">Bet Amount ($)</label>
-                    <input type="number" id="bet_amount" name="bet_amount" required min="1" step="0.01">
+                    <label for="odds">Enter the odds for each leg of the parlay (American Odds, e.g. -200):</label>
+                    <div id="odds-container">
+                        <div class="odds-leg">
+                            <input type="number" name="odds[]" required placeholder="Leg 1 odds (e.g. -200)">
+                        </div>
+                    </div>
+                    <button type="button" id="add-leg" class="btn">Add Another Leg (Optional)</button>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="odds">Odds (e.g., +200, -150)</label>
-                    <input type="number" id="odds" name="odds" required step="1">
+                    <label for="profit-boost">Profit Boost Percentage (e.g., 10 for 10%):</label>
+                    <input type="number" id="profit-boost" name="profit_boost" step="0.01" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="boost_percentage">Profit Boost (%)</label>
-                    <input type="number" id="boost_percentage" name="boost_percentage" required min="0" step="1">
+                    <label for="bet-amount">Bet Amount ($):</label>
+                    <input type="number" id="bet-amount" name="bet_amount" step="0.01" required>
                 </div>
 
-                <button type="submit" class="btn">Calculate Profit Boost</button>
+                <div class="form-group">
+                    <label for="vig-percentage">Vig Percentage (default 4.76%):</label>
+                    <input type="number" id="vig-percentage" name="vig_percentage" step="0.01" value="4.76" required>
+                </div>
+
+                <button type="submit" class="btn">Calculate ROI</button>
             </form>
 
-            {% if profit is not none and boosted_profit is not none %}
-                <section class="results">
-                    <h2>Calculation Results</h2>
-                    <p>Bet Amount: ${{ bet_amount }}</p>
-                    <p>Odds: {{ odds }}</p>
-                    <p>Profit Boost: {{ boost_percentage }}%</p>
-                    <p>Expected Profit: ${{ profit }}</p>
-                    <p>Boosted Profit: ${{ boosted_profit }}</p>
-                </section>
+            {% if results %}
+            <div class="results">
+                <h2>Results</h2>
+                <p>Decimal Odds: <strong>{{ results['decimal_odds'] }}</strong></p>
+                <p>American Odds: <strong>{{ results['american_odds'] }}</strong></p>
+                <p>ROI Before Boost: <strong>{{ results['roi_before_boost'] }}%</strong></p>
+                <p>Boosted Profit: <strong>${{ results['boosted_profit'] }}</strong></p>
+                <p>Boosted ROI: <strong>{{ results['boosted_roi'] }}%</strong></p>
+            </div>
+        {% endif %}
+        
+
+            {% if error_message %}
+                <div class="error-message">
+                    <p>{{ error_message }}</p>
+                </div>
             {% endif %}
         </section>
     </main>
+
+    <script>
+        // Add event listener to add more odds input fields dynamically
+        document.getElementById('add-leg').addEventListener('click', function() {
+            const container = document.getElementById('odds-container');
+            const newLeg = document.createElement('div');
+            newLeg.classList.add('odds-leg');
+            newLeg.innerHTML = '<input type="number" name="odds[]" required placeholder="Leg odds (e.g. -200)">';
+            container.appendChild(newLeg);
+        });
+    </script>
 {% endblock %}
