@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from parlay_odds import calculate_parlay
+from roi_calculator import calculate_roi_before_boost, calculate_roi_after_boost, american_to_decimal  # Import functions
 
 app = Flask(__name__)
 
@@ -42,48 +43,58 @@ def parlay():
 
     return render_template('parlay.html', results=results, error_message=error_message, dollar_amount=dollar_amount)
 
+
+
 @app.route('/roi_calculator', methods=['GET', 'POST'])
 def roi_calculator():
     if request.method == 'POST':
         try:
-            # Get user inputs, ensure they are float and handle missing fields gracefully
+            # Get user inputs
             bet_amount = float(request.form['bet_amount'])
-            odds = float(request.form['odds'])
-            boost_percentage = float(request.form['boost_percentage'])
-            vig = float(request.form.get('vig', 4.76))  # Default vig to 4.76% if not provided
+            boost_percentage = float(request.form['profit_boost'])
+            vig = float(request.form.get('vig_percentage', 4.76))  # Default vig to 4.76% if not provided
 
-            # Convert odds to decimal format
-            if odds > 0:
-                decimal_odds = 1 + (odds / 100)
-            else:
-                decimal_odds = 1 + (100 / abs(odds))
+            # Get the list of odds from the form
+            odds_list = request.form.getlist('odds[]')
+            odds_list = [int(odds) for odds in odds_list]
 
-            # Calculate profit and boosted profit
-            profit = bet_amount * (decimal_odds - 1) * (1 - vig / 100)
-            boosted_profit = profit * (1 + boost_percentage / 100)
+            # Calculate the combined decimal odds for the parlay
+            decimal_odds = 1
+            for odds in odds_list:
+                decimal_odds *= american_to_decimal(odds)
 
-            # Calculate ROI (boosted return percentage)
-            boosted_return = (boosted_profit - bet_amount) / bet_amount * 100
+            # Apply the profit boost
+            adjusted_decimal_odds = decimal_odds * (1 + (boost_percentage / 100))
 
-            # Return the values to the template
+            # Convert adjusted decimal odds to American odds
+            adjusted_parlay_american_odds = (adjusted_decimal_odds - 1) * 100 if adjusted_decimal_odds > 2 else -(100 / (adjusted_decimal_odds - 1))
+
+            # Calculate ROI before boost
+            roi_before_boost = calculate_roi_before_boost(decimal_odds, bet_amount, vig)
+
+            # Calculate ROI after applying the boost
+            roi_after_boost = calculate_roi_after_boost(adjusted_decimal_odds, decimal_odds, bet_amount, vig)
+
+            results = {
+                "decimal_odds": round(decimal_odds, 2),
+                "american_odds": round((decimal_odds - 1) * 100 if decimal_odds > 2 else -(100 / (decimal_odds - 1))),
+                "roi_before_boost": round(roi_before_boost, 2),
+                "boosted_profit": round(adjusted_decimal_odds * bet_amount - bet_amount, 2),
+                "boosted_roi": round(roi_after_boost, 2)
+            }
+
             return render_template(
                 'roi_calculator.html',
+                results=results,
                 bet_amount=bet_amount,
-                odds=odds,
+                odds=odds_list,
                 boost_percentage=boost_percentage,
-                profit=round(profit, 2),
-                boosted_profit=round(boosted_profit, 2),
-                boosted_return=round(boosted_return, 2),
+                vig_percentage=vig,
             )
-        except ValueError:
-            # Return the error message for invalid input
-            return render_template('roi_calculator.html', error="Please ensure all inputs are valid numeric values.")
         except Exception as e:
-            # Catch other exceptions and display a general error
-            return render_template('roi_calculator.html', error=f"An error occurred: {str(e)}")
+            return render_template('roi_calculator.html', error=str(e))
 
-    # Render the form for GET requests with no initial results
-    return render_template('roi_calculator.html', profit=None, boosted_profit=None, boosted_return=None)
+    return render_template('roi_calculator.html', results=None)
 
 
 @app.route('/vig_calculator', methods=['GET', 'POST'])
