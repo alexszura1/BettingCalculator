@@ -3,10 +3,10 @@
 {% block content %}
     <main>
         <section class="container">
-            <h1>Profit Boost Calculator</h1>
+            <h1>ROI Calculator</h1>
             <p>Use this tool to calculate your profit boost for betting odds. Enter your bet details below:</p>
 
-            <form action="{{ url_for('profit_boost') }}" method="POST">
+            <form action="{{ url_for('roi_calculator') }}" method="POST">
                 <div class="form-group">
                     <label for="bet_amount">Bet Amount ($)</label>
                     <input type="number" id="bet_amount" name="bet_amount" required min="1" step="0.01">
@@ -24,6 +24,17 @@
 
                 <button type="submit" class="btn">Calculate Profit Boost</button>
             </form>
+
+            {% if profit is not none and boosted_profit is not none %}
+                <section class="results">
+                    <h2>Calculation Results</h2>
+                    <p>Bet Amount: ${{ bet_amount }}</p>
+                    <p>Odds: {{ odds }}</p>
+                    <p>Profit Boost: {{ boost_percentage }}%</p>
+                    <p>Expected Profit: ${{ profit }}</p>
+                    <p>Boosted Profit: ${{ boosted_profit }}</p>
+                </section>
+            {% endif %}
         </section>
     </main>
 {% endblock %}

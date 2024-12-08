@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <main>
+        <section class="container">
+            <h1>Vig Calculator</h1>
+            <p>Use this tool to calculate the vig (or juice) for a betting market. Enter the odds for all outcomes below:</p>
+
+            <form action="{{ url_for('vig_calculator') }}" method="POST">
+                <div class="form-group">
+                    <label for="odds1">Odds for Outcome 1 (e.g., -110)</label>
+                    <input type="number" id="odds1" name="odds1" required step="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="odds2">Odds for Outcome 2 (e.g., -110)</label>
+                    <input type="number" id="odds2" name="odds2" required step="1">
+                </div>
+
+                <button type="submit" class="btn">Calculate Vig</button>
+            </form>
+
+            {% if vig is not none %}
+                <section class="results">
+                    <h2>Calculation Results</h2>
+                    <p>The vig for this market is: <strong>{{ vig }}%,</strong></p>this is what you can expect to lose on average.
+                </section>
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}
