@@ -42,10 +42,12 @@
                 <h2>Results</h2>
                 <p>Decimal Odds: <strong>{{ results['decimal_odds'] }}</strong></p>
                 <p>American Odds: <strong>{{ results['american_odds'] }}</strong></p>
+                <p>Expected Value (Net Return): <strong>${{ results['expected_value'] }}</strong></p>
                 <p>ROI Before Boost: <strong>{{ results['roi_before_boost'] }}%</strong></p>
-                <p>Boosted Profit: <strong>${{ results['boosted_profit'] }}</strong></p>
+                <p>Boosted Expected Value (Net Return): <strong>${{ results['boosted_expected_value'] }}</strong></p>
                 <p>Boosted ROI: <strong>{{ results['boosted_roi'] }}%</strong></p>
             </div>
+            
         {% endif %}
         
 

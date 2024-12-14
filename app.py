@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request
 from parlay_odds import calculate_parlay
-from roi_calculator import calculate_roi_before_boost, calculate_roi_after_boost, american_to_decimal  # Import functions
+from roi_calculator import (
+    calculate_parlay,
+    apply_profit_boost,
+    decimal_to_american,
+    calculate_roi_after_boost,
+)
 
 app = Flask(__name__)
 
@@ -43,58 +48,42 @@ def parlay():
 
     return render_template('parlay.html', results=results, error_message=error_message, dollar_amount=dollar_amount)
 
-
-
 @app.route('/roi_calculator', methods=['GET', 'POST'])
 def roi_calculator():
+    results = None
+    error_message = None
+
     if request.method == 'POST':
         try:
-            # Get user inputs
+            # Retrieve form data
+            odds = request.form.getlist('odds[]')
+            odds = [int(odd) for odd in odds]
+            profit_boost = float(request.form['profit_boost'])
             bet_amount = float(request.form['bet_amount'])
-            boost_percentage = float(request.form['profit_boost'])
-            vig = float(request.form.get('vig_percentage', 4.76))  # Default vig to 4.76% if not provided
+            vig_percentage = float(request.form['vig_percentage'])
 
-            # Get the list of odds from the form
-            odds_list = request.form.getlist('odds[]')
-            odds_list = [int(odds) for odds in odds_list]
+            # Calculate initial parlay odds
+            decimal_odds, american_odds = calculate_parlay(odds)
 
-            # Calculate the combined decimal odds for the parlay
-            decimal_odds = 1
-            for odds in odds_list:
-                decimal_odds *= american_to_decimal(odds)
+            # Apply profit boost
+            adjusted_decimal_odds = apply_profit_boost(decimal_odds, profit_boost)
 
-            # Apply the profit boost
-            adjusted_decimal_odds = decimal_odds * (1 + (boost_percentage / 100))
+            # Calculate ROI after profit boost
+            roi_after_boost = calculate_roi_after_boost(adjusted_decimal_odds, decimal_odds, bet_amount, vig_percentage)
 
-            # Convert adjusted decimal odds to American odds
-            adjusted_parlay_american_odds = (adjusted_decimal_odds - 1) * 100 if adjusted_decimal_odds > 2 else -(100 / (adjusted_decimal_odds - 1))
-
-            # Calculate ROI before boost
-            roi_before_boost = calculate_roi_before_boost(decimal_odds, bet_amount, vig)
-
-            # Calculate ROI after applying the boost
-            roi_after_boost = calculate_roi_after_boost(adjusted_decimal_odds, decimal_odds, bet_amount, vig)
-
+            # Prepare results
             results = {
-                "decimal_odds": round(decimal_odds, 2),
-                "american_odds": round((decimal_odds - 1) * 100 if decimal_odds > 2 else -(100 / (decimal_odds - 1))),
-                "roi_before_boost": round(roi_before_boost, 2),
-                "boosted_profit": round(adjusted_decimal_odds * bet_amount - bet_amount, 2),
-                "boosted_roi": round(roi_after_boost, 2)
+                'decimal_odds': round(decimal_odds, 2),
+                'american_odds': round(american_odds),
+                'adjusted_decimal_odds': round(adjusted_decimal_odds, 2),
+                'adjusted_american_odds': decimal_to_american(adjusted_decimal_odds),
+                'roi_after_boost': round(roi_after_boost, 2)
             }
 
-            return render_template(
-                'roi_calculator.html',
-                results=results,
-                bet_amount=bet_amount,
-                odds=odds_list,
-                boost_percentage=boost_percentage,
-                vig_percentage=vig,
-            )
         except Exception as e:
-            return render_template('roi_calculator.html', error=str(e))
+            error_message = f"An error occurred: {e}"
 
-    return render_template('roi_calculator.html', results=None)
+    return render_template('roi_calculator.html', results=results, error_message=error_message)
 
 
 @app.route('/vig_calculator', methods=['GET', 'POST'])
