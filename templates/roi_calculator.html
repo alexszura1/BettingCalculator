@@ -38,15 +38,19 @@
             </form>
 
             {% if results %}
+            {% if results %}
             <div class="results">
                 <h2>Results</h2>
-                <p>Decimal Odds: <strong>{{ results['decimal_odds'] }}</strong></p>
-                <p>American Odds: <strong>{{ results['american_odds'] }}</strong></p>
-                <p>Expected Value (Net Return): <strong>${{ results['expected_value'] }}</strong></p>
+                <p>Decimal Odds Before Boost: <strong>{{ results['decimal_odds_before_boost'] }}</strong></p>
+                <p>American Odds Before Boost: <strong>{{ results['american_odds_before_boost'] }}</strong></p>
+                <p>Decimal Odds After Boost: <strong>{{ results['decimal_odds_after_boost'] }}</strong></p>
+                <p>American Odds After Boost: <strong>{{ results['american_odds_after_boost'] }}</strong></p>
                 <p>ROI Before Boost: <strong>{{ results['roi_before_boost'] }}%</strong></p>
-                <p>Boosted Expected Value (Net Return): <strong>${{ results['boosted_expected_value'] }}</strong></p>
-                <p>Boosted ROI: <strong>{{ results['boosted_roi'] }}%</strong></p>
+                <p>ROI After Boost: <strong>{{ results['roi_after_boost'] }}%</strong></p>
             </div>
+            {% endif %}
+            
+
             
         {% endif %}
         

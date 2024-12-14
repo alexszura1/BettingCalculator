@@ -1,11 +1,6 @@
 from flask import Flask, render_template, request
 from parlay_odds import calculate_parlay
-from roi_calculator import (
-    calculate_parlay,
-    apply_profit_boost,
-    decimal_to_american,
-    calculate_roi_after_boost,
-)
+from roi_calculator import calculate_parlay_results  # Import the function
 
 app = Flask(__name__)
 
@@ -55,36 +50,22 @@ def roi_calculator():
 
     if request.method == 'POST':
         try:
-            # Retrieve form data
-            odds = request.form.getlist('odds[]')
-            odds = [int(odd) for odd in odds]
-            profit_boost = float(request.form['profit_boost'])
+            # Retrieve form inputs
+            odds_list = [int(odds) for odds in request.form.getlist('odds[]')]
+            profit_boost_percentage = float(request.form['profit_boost'])
             bet_amount = float(request.form['bet_amount'])
             vig_percentage = float(request.form['vig_percentage'])
 
-            # Calculate initial parlay odds
-            decimal_odds, american_odds = calculate_parlay(odds)
-
-            # Apply profit boost
-            adjusted_decimal_odds = apply_profit_boost(decimal_odds, profit_boost)
-
-            # Calculate ROI after profit boost
-            roi_after_boost = calculate_roi_after_boost(adjusted_decimal_odds, decimal_odds, bet_amount, vig_percentage)
-
-            # Prepare results
-            results = {
-                'decimal_odds': round(decimal_odds, 2),
-                'american_odds': round(american_odds),
-                'adjusted_decimal_odds': round(adjusted_decimal_odds, 2),
-                'adjusted_american_odds': decimal_to_american(adjusted_decimal_odds),
-                'roi_after_boost': round(roi_after_boost, 2)
-            }
+            # Calculate results using the backend function
+            results = calculate_parlay_results(
+                odds_list, profit_boost_percentage, bet_amount, vig_percentage
+            )
 
         except Exception as e:
             error_message = f"An error occurred: {e}"
 
+    # Pass the results and any error message to the template
     return render_template('roi_calculator.html', results=results, error_message=error_message)
-
 
 @app.route('/vig_calculator', methods=['GET', 'POST'])
 def vig_calculator():
